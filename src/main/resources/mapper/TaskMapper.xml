@@ -47,4 +47,9 @@
     <delete id="deleteTask">
         DELETE FROM tasks WHERE id = #{id}
     </delete>
+
+    <!-- 自定义通过 userId 查询任务的 SQL 语句 -->
+    <select id="findTasksByUserId" resultMap="TaskResultMap">
+        SELECT * FROM tasks WHERE user_id = #{userId}
+    </select>
 </mapper>
