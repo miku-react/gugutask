@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.fengling.gugutask.dao.UserMapper">
+    <resultMap id="UserResultMap" type="org.fengling.gugutask.pojo.User">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="email" property="email"/>
+        <result column="created_at" property="createdAt"/>
+        <result column="updated_at" property="updatedAt"/>
+    </resultMap>
+
+    <!-- 查询单个用户 -->
+    <select id="findUserById" resultMap="UserResultMap">
+        SELECT * FROM users WHERE id = #{id}
+    </select>
+
+    <!-- 查询所有用户 -->
+    <select id="findAllUsers" resultMap="UserResultMap">
+        SELECT * FROM users
+    </select>
+
+    <!-- 插入用户 -->
+    <insert id="insertUser" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO users(username, password, email)
+        VALUES(#{username}, #{password}, #{email})
+    </insert>
+
+    <!-- 更新用户时更新 updated_at -->
+    <update id="updateUser">
+        UPDATE users
+        SET username = #{username}, password = #{password}, email = #{email}, updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除用户 -->
+    <delete id="deleteUser">
+        DELETE FROM users WHERE id = #{id}
+    </delete>
+</mapper>

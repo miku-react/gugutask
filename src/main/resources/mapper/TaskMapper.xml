@@ -28,14 +28,14 @@
         SELECT * FROM tasks
     </select>
 
-    <!-- 插入任务时处理 created_at 和 updated_at -->
+    <!-- 插入任务-->
     <insert id="insertTask" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO tasks(name, detail, priority, date1, date2, status, user_id, type_id, created_at, updated_at)
-        VALUES(#{name}, #{detail}, #{priority}, #{date1}, #{date2}, #{status}, #{userId}, #{typeId}, NOW(), NOW())
+        INSERT INTO tasks(name, detail, priority, date1, date2, status, user_id, type_id)
+        VALUES(#{name}, #{detail}, #{priority}, #{date1}, #{date2}, #{status}, #{userId}, #{typeId})
     </insert>
 
 
-    <!-- 更新任务时只更新 updated_at -->
+    <!-- 更新任务 -->
     <update id="updateTask">
         UPDATE tasks
         SET name = #{name}, detail = #{detail}, priority = #{priority}, date1 = #{date1},
