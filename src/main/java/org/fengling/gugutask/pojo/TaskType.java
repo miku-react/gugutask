@@ -14,6 +14,7 @@ public class TaskType {
     @TableId(type = IdType.AUTO)
     private Long id;
     private String typeName;
+    private Long userId;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;

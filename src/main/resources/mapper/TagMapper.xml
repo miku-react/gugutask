@@ -13,4 +13,10 @@
     </resultMap>
 
     <!-- 自定义查询 -->
+    <!-- 自定义通过 userId 查询标签的 SQL 语句 -->
+    <select id="findTagsByUserId" resultType="org.fengling.gugutask.pojo.Tag">
+        SELECT *
+        FROM tags
+        WHERE user_id = #{userId}
+    </select>
 </mapper>
