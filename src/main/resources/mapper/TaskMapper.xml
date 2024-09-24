@@ -4,6 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="org.fengling.gugutask.dao.TaskMapper">
+
     <resultMap id="TaskResultMap" type="org.fengling.gugutask.pojo.Task">
         <id column="id" property="id"/>
         <result column="name" property="name"/>
@@ -18,38 +19,11 @@
         <result column="type_id" property="typeId"/>
     </resultMap>
 
-    <!-- 查询单个任务 -->
-    <select id="findTaskById" resultMap="TaskResultMap">
-        SELECT * FROM tasks WHERE id = #{id}
-    </select>
-
-    <!-- 查询所有任务 -->
-    <select id="findAllTasks" resultMap="TaskResultMap">
-        SELECT * FROM tasks
-    </select>
-
-    <!-- 插入任务-->
-    <insert id="insertTask" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO tasks(name, detail, priority, date1, date2, status, user_id, type_id)
-        VALUES(#{name}, #{detail}, #{priority}, #{date1}, #{date2}, #{status}, #{userId}, #{typeId})
-    </insert>
-
-
-    <!-- 更新任务 -->
-    <update id="updateTask">
-        UPDATE tasks
-        SET name = #{name}, detail = #{detail}, priority = #{priority}, date1 = #{date1},
-            date2 = #{date2}, status = #{status}, updated_at = NOW(), user_id = #{userId}, type_id = #{typeId}
-        WHERE id = #{id}
-    </update>
-
-    <!-- 删除任务 -->
-    <delete id="deleteTask">
-        DELETE FROM tasks WHERE id = #{id}
-    </delete>
-
     <!-- 自定义通过 userId 查询任务的 SQL 语句 -->
     <select id="findTasksByUserId" resultMap="TaskResultMap">
-        SELECT * FROM tasks WHERE user_id = #{userId}
+        SELECT *
+        FROM tasks
+        WHERE user_id = #{userId}
     </select>
+
 </mapper>
