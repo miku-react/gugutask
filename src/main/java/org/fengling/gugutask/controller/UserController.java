@@ -1,11 +1,10 @@
 package org.fengling.gugutask.controller;
 
+import org.apache.shiro.authz.annotation.RequiresAuthentication;
 import org.fengling.gugutask.pojo.User;
 import org.fengling.gugutask.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -14,37 +13,40 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    // 获取所有用户
-    @GetMapping
-    public List<User> getAllUsers() {
-        return userService.list();
-    }
-
-    // 获取单个用户
-    @GetMapping("/{id}")
-    public User getUserById(@PathVariable Long id) {
-        return userService.getById(id);
-    }
-
-    // 创建用户
-    @PostMapping
-    public User createUser(@RequestBody User user) {
+    // 用户注册
+    @PostMapping("/register")
+    public User registerUser(@RequestBody User user) {
         userService.save(user);
         return user;
     }
 
-    // 更新用户
-    @PutMapping("/{id}")
-    public User updateUser(@PathVariable Long id, @RequestBody User user) {
-        user.setId(id);
-        userService.updateById(user);
+    // 获取当前用户信息 (用户自己)
+    @RequiresAuthentication
+    @GetMapping("/me")
+    public User getCurrentUser(@RequestParam String username) {
+        return userService.findByUsername(username); // 这里假设从session或token中获取username
+    }
+
+    // 更新用户自己的信息
+    @RequiresAuthentication
+    @PutMapping("/me")
+    public User updateUser(@RequestParam String username, @RequestBody User user) {
+        User currentUser = userService.findByUsername(username);
+        if (currentUser != null) {
+            user.setId(currentUser.getId());
+            userService.updateById(user);
+        }
         return user;
     }
 
-    // 删除用户
-    @DeleteMapping("/{id}")
-    public String deleteUser(@PathVariable Long id) {
-        userService.removeById(id);
-        return "User deleted successfully.";
+    // 用户注销自己
+    @RequiresAuthentication
+    @DeleteMapping("/me")
+    public String deleteCurrentUser(@RequestParam String username) {
+        User currentUser = userService.findByUsername(username);
+        if (currentUser != null) {
+            userService.removeById(currentUser.getId());
+        }
+        return "User account deleted successfully.";
     }
 }
