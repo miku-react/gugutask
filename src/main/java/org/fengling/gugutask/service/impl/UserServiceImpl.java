@@ -5,8 +5,12 @@ import org.fengling.gugutask.dao.UserMapper;
 import org.fengling.gugutask.pojo.User;
 import org.fengling.gugutask.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -20,17 +24,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public Set<String> findRolesByUserId(Long userId) {
+    public List<String> findRolesByUserId(Long userId) {
         return userMapper.findRolesByUserId(userId);
     }
 
-    @Override
-    public Set<String> findPermissionsByRoleId(Long roleId) {
-        return userMapper.findPermissionsByRoleId(roleId);
-    }
+    // 实现获取用户角色和权限并转换为GrantedAuthority
 
+
+    // 只转换角色为GrantedAuthority对象
     @Override
-    public Long findRoleIdByRoleName(String roleName) {
-        return userMapper.findRoleIdByRoleName(roleName);
+    public Set<GrantedAuthority> getUserAuthorities(Long userId) {
+        Set<GrantedAuthority> authorities = new HashSet<>();
+        List<String> roles = findRolesByUserId(userId);
+
+        // 将每个角色转换为GrantedAuthority，并加上"ROLE_"前缀
+        for (String role : roles) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+        }
+
+        return authorities;
     }
 }
