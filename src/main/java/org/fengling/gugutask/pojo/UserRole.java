@@ -1,15 +1,18 @@
 package org.fengling.gugutask.pojo;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Data
 public class UserRole {
     private Long userId;
     private Long roleId;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime createdAt;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime updatedAt;
 
     public UserRole(Long userId, Long roleId) {
         this.userId = userId;

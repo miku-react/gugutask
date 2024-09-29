@@ -1,11 +1,11 @@
 package org.fengling.gugutask.controller;
 
+import org.fengling.gugutask.dto.UserD;
 import org.fengling.gugutask.pojo.User;
 import org.fengling.gugutask.security.jwt.JwtUtil;
 import org.fengling.gugutask.service.UserService;
+import org.fengling.gugutask.util.R;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,77 +18,91 @@ public class UserController {
 
     @Autowired
     private JwtUtil jwtUtil;
+
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     // 获取当前用户信息 (用户自己)
     @GetMapping("/me")
-    public User getCurrentUser(@RequestHeader("Authorization") String authHeader) {
+    public R<UserD> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);  // 提取JWT token
         String username = jwtUtil.extractUsername(token);  // 从JWT中提取用户名
 
-        return userService.findByUsername(username);
+        User user = userService.findByUsername(username);
+
+        // 转换 User 到 UserD
+        if (user != null) {
+            UserD userD = new UserD(
+                    user.getUsername(),
+                    user.getEmail(),
+                    user.getCreatedAt(),
+                    user.getUpdatedAt()
+            );
+            return R.success(userD);  // 返回封装的成功数据
+        }
+
+        // 如果用户未找到，返回404错误
+        return R.notFound("User not found");
     }
 
     // 更新用户自己的信息
     @PutMapping("/me")
-    public ResponseEntity<?> updateUser(@RequestHeader("Authorization") String authHeader, @RequestBody User user) {
-        // 提取JWT token
+    public R<UserD> updateUser(@RequestHeader("Authorization") String authHeader, @RequestBody User user) {
         String token = authHeader.substring(7);
         Long userId = jwtUtil.extractUserId(token); // 从JWT中提取用户ID
 
-        // 查找当前用户
         User currentUser = userService.findByUserId(userId);
         if (currentUser == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+            return R.notFound("User not found");
         }
 
-        // 检查用户名是否存在且不属于当前用户
         User existingUser = userService.findByUsername(user.getUsername());
         if (existingUser != null && !existingUser.getId().equals(currentUser.getId())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username is already taken");
+            return R.error("Username is already taken");
         }
 
-        // 保持用户ID一致
         user.setId(currentUser.getId());
 
-        // 检查并处理用户名
         if (user.getUsername() == null || user.getUsername().isEmpty()) {
             user.setUsername(currentUser.getUsername());
         }
 
-        // 检查并处理密码
         if (user.getPassword() == null || user.getPassword().isEmpty()) {
-            user.setPassword(currentUser.getPassword()); // 如果没有新密码，保持旧密码
+            user.setPassword(currentUser.getPassword());
         } else {
-            // 对密码进行加密
             String encryptedPassword = passwordEncoder.encode(user.getPassword());
             user.setPassword(encryptedPassword);
         }
 
-        // 检查并处理邮箱
         if (user.getEmail() == null || user.getEmail().isEmpty()) {
             user.setEmail(currentUser.getEmail());
         }
 
-        // 更新用户信息
         userService.updateById(user);
+        User userAfterUpdate = userService.findByUserId(userId);
 
-        // 返回更新后的用户信息
-        return ResponseEntity.ok(user);
+        // 更新完成后返回新的用户信息，封装成 UserD
+        UserD updatedUserD = new UserD(
+                userAfterUpdate.getUsername(),
+                userAfterUpdate.getEmail(),
+                userAfterUpdate.getCreatedAt(),
+                userAfterUpdate.getUpdatedAt()
+        );
+
+        return R.success(updatedUserD);  // 返回封装的成功数据
     }
 
     // 用户注销自己
     @DeleteMapping("/me")
-    public String deleteCurrentUser(@RequestHeader("Authorization") String authHeader) {
+    public R<String> deleteCurrentUser(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);  // 提取JWT token
         String username = jwtUtil.extractUsername(token);  // 从JWT中提取用户名
 
         User currentUser = userService.findByUsername(username);
         if (currentUser != null) {
             userService.deleteUserById(currentUser.getId());
-            return "User account deleted successfully.";
+            return R.success("User account deleted successfully.");
         }
-        return "User not found.";
+        return R.notFound("User not found.");
     }
 }

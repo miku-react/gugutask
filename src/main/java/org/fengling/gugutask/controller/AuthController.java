@@ -8,10 +8,9 @@ import org.fengling.gugutask.service.RoleService;
 import org.fengling.gugutask.service.TaskTypeService;
 import org.fengling.gugutask.service.UserRoleService;
 import org.fengling.gugutask.service.UserService;
+import org.fengling.gugutask.util.R;
 import org.fengling.gugutask.util.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -43,13 +42,13 @@ public class AuthController {
 
     // 登录接口
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User loginRequest) {
+    public R<Map<String, String>> login(@RequestBody User loginRequest) {
         // 从数据库查找用户
         User user = userService.findByUsername(loginRequest.getUsername());
 
         // 验证用户名是否存在和密码是否正确
         if (user == null || !passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            return ResponseEntity.status(401).body("Invalid credentials");
+            return R.unauthorized("用户名或密码错误");
         }
 
         // 获取用户的角色信息（使用findRolesByUserId）
@@ -62,15 +61,17 @@ public class AuthController {
         Map<String, String> response = new HashMap<>();
         response.put("token", token);
 
-        return ResponseEntity.ok(response);
+        return R.success(response);
     }
 
+    // 注册接口
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody User user) {
+    public R<String> registerUser(@RequestBody User user) {
         // 检查用户名是否存在
         if (userService.findByUsername(user.getUsername()) != null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username is already taken");
+            return R.error("用户名已被注册");
         }
+
         // 生成用户ID
         user.setId(snowflakeIdGenerator.generateId());
 
@@ -84,18 +85,17 @@ public class AuthController {
         // 查找USER角色的ID
         Role userRole = roleService.findByRoleName("USER");
         if (userRole == null) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("USER role not found");
+            return R.error("USER角色未找到");
         }
 
         // 将用户角色关联到user_roles表中
         UserRole userRoleAssociation = new UserRole(user.getId(), userRole.getId());
         userRoleService.save(userRoleAssociation);
+
         // 为新用户创建默认的任务类型
         taskTypeService.createDefaultTaskTypesForUser(user.getId());
 
         // 返回注册成功状态
-        return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully with USER role");
+        return R.success("用户注册成功，并赋予USER角色");
     }
-
-
 }
