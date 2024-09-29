@@ -1,7 +1,12 @@
 package org.fengling.gugutask.controller;
 
+import org.fengling.gugutask.pojo.Role;
 import org.fengling.gugutask.pojo.User;
+import org.fengling.gugutask.pojo.UserRole;
 import org.fengling.gugutask.security.jwt.JwtUtil;
+import org.fengling.gugutask.service.RoleService;
+import org.fengling.gugutask.service.TaskTypeService;
+import org.fengling.gugutask.service.UserRoleService;
 import org.fengling.gugutask.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -29,6 +34,14 @@ public class LoginController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private RoleService roleService;
+
+    @Autowired
+    private UserRoleService userRoleService;
+    @Autowired
+    private TaskTypeService taskTypeService;
+
     // 登录接口
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User loginRequest) {
@@ -53,10 +66,9 @@ public class LoginController {
         return ResponseEntity.ok(response);
     }
 
-    // 用户注册
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
-        // 检查用户名是否已存在
+        // 检查用户名是否存在
         if (userService.findByUsername(user.getUsername()) != null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Username is already taken");
         }
@@ -66,9 +78,23 @@ public class LoginController {
         user.setPassword(encryptedPassword);
 
         // 保存用户到数据库
-        userService.save(user);
+        userService.save(user); // 保存后 user 会有 id
+
+        // 查找USER角色的ID
+        Role userRole = roleService.findByRoleName("USER");
+        if (userRole == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("USER role not found");
+        }
+
+        // 将用户角色关联到user_roles表中
+        UserRole userRoleAssociation = new UserRole(user.getId(), userRole.getId());
+        userRoleService.save(userRoleAssociation);
+        // 为新用户创建默认的任务类型
+        taskTypeService.createDefaultTaskTypesForUser(user.getId());
 
         // 返回注册成功状态
-        return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully");
+        return ResponseEntity.status(HttpStatus.CREATED).body("User registered successfully with USER role");
     }
+
+
 }

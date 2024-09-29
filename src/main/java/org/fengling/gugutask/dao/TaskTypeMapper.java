@@ -12,4 +12,5 @@ public interface TaskTypeMapper extends BaseMapper<TaskType> {
     // 在这里添加额外的自定义查询方法
     @Select("SELECT * FROM task_types WHERE user_id = #{userId}")
     List<TaskType> findTaskTypesByUserId(Long userId);
+
 }

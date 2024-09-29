@@ -8,4 +8,7 @@ import java.util.List;
 public interface TaskTypeService extends IService<TaskType> {
     // 可以在这里添加额外的业务逻辑方法
     List<TaskType> findTaskTypesByUserId(Long userId);
+
+    // 给每个用户创建默认类型
+    void createDefaultTaskTypesForUser(Long userId);
 }

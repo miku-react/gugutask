@@ -21,4 +21,15 @@ public class TaskType {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime updatedAt;
+
+    // 无参构造函数（MyBatis需要）
+    public TaskType() {
+    }
+
+    // 带有typeName和userId的构造函数
+    public TaskType(String typeName, Long userId) {
+        this.typeName = typeName;
+        this.userId = userId;
+
+    }
 }
