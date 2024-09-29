@@ -18,12 +18,6 @@ public class TagController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    // 查询所有标签
-    @GetMapping
-    public List<Tag> getAllTags() {
-        return tagService.list();
-    }
-
     // 查询单个标签
     @GetMapping("/{id}")
     public Tag getTagById(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {

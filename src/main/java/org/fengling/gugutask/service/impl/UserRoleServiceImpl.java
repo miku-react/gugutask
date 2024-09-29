@@ -16,4 +16,10 @@ public class UserRoleServiceImpl implements UserRoleService {
     public void save(UserRole userRole) {
         userRoleMapper.saveUserRole(userRole);
     }
+
+    // 根据 userId 删除 user_roles 中的关联记录
+    @Override
+    public void removeByUserId(Long userId) {
+        userRoleMapper.deleteByUserId(userId);
+    }
 }

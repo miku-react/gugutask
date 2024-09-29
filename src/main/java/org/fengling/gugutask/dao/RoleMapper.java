@@ -7,6 +7,7 @@ import org.fengling.gugutask.pojo.Role;
 
 @Mapper
 public interface RoleMapper {
+    // 查找USER角色的ID
     @Select("SELECT * FROM roles WHERE role_name = #{roleName}")
     Role findByRoleName(@Param("roleName") String roleName);
 }

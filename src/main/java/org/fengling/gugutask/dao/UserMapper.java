@@ -14,6 +14,10 @@ public interface UserMapper extends BaseMapper<User> {
     @Select("SELECT * FROM users WHERE username = #{username}")
     User findByUsername(String username);
 
+    // 通过用户ID查找用户
+    @Select("SELECT * FROM users WHERE id = #{userid}")
+    User findByUserId(Long userid);
+
     // 通过用户ID查找用户角色
     @Select("SELECT r.role_name FROM user_roles ur JOIN roles r ON ur.role_id = r.id WHERE ur.user_id = #{userId}")
     List<String> findRolesByUserId(Long userId);

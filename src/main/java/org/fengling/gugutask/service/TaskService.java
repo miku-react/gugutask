@@ -7,5 +7,8 @@ import java.util.List;
 
 public interface TaskService extends IService<Task> {
     // 可以在这里添加额外的业务逻辑方法
-List<Task> getTasksByUserId(Long userId);
+    List<Task> getTasksByUserId(Long userId);
+
+    // 根据 userId 删除 tasks 中的记录
+    void removeByUserId(Long userId);
 }

@@ -20,4 +20,9 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
         // 调用 TaskMapper 中的自定义查询方法
         return taskMapper.findTasksByUserId(userId);
     }
+
+    @Override
+    public void removeByUserId(Long userId) {
+        taskMapper.deleteByUserId(userId);
+    }
 }

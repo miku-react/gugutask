@@ -1,15 +1,21 @@
 package org.fengling.gugutask.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import org.fengling.gugutask.pojo.Tag;
+import org.fengling.gugutask.pojo.Task;
 import org.fengling.gugutask.pojo.TaskTag;
 import org.fengling.gugutask.security.jwt.JwtUtil;
 import org.fengling.gugutask.service.TagService;
 import org.fengling.gugutask.service.TaskService;
 import org.fengling.gugutask.service.TaskTagService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/task-tags")
@@ -42,15 +48,26 @@ public class TaskTagController {
 
     // 查询某个标签下的所有任务，校验 userId
     @GetMapping("/tag/{tagId}")
-    public List<TaskTag> getTasksByTagId(@PathVariable Long tagId, @RequestHeader("Authorization") String authHeader) {
+    public List<Task> getTasksByTagId(@PathVariable Long tagId, @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);  // 提取JWT token
         Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
 
-        // 校验标签是否属于该用户
-        if (!tagService.getById(tagId).getUserId().equals(userId)) {
-            throw new RuntimeException("标签不属于该用户");
+        // 查询标签并检查是否为 null
+        Tag tag = tagService.getById(tagId);
+        if (tag == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "标签不存在");
         }
-        return taskTagService.findTasksByTagId(tagId);
+        // 根据tagId查询任务标签映射
+        List<TaskTag> taskTags = taskTagService.findTasksByTagId(tagId);
+
+        // 根据taskId查询对应的Task实体
+        List<Task> tasks = taskTags.stream()
+                .map(taskTag -> taskService.getById(taskTag.getTaskId()))  // 根据taskId获取Task对象
+                .filter(Objects::nonNull)  // 过滤掉可能为null的任务
+                .collect(Collectors.toList());
+
+        return tasks;
+
     }
 
     // 给任务添加标签，校验 userId

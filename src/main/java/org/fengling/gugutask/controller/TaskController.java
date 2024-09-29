@@ -19,16 +19,6 @@ public class TaskController {
         this.jwtUtil = jwtUtil;
     }
 
-    // 查询单个任务 (用户只能查询自己的任务)
-    @GetMapping("/{id}")
-    public Task getTaskById(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.substring(7);  // 提取JWT token
-        Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
-
-        Task task = taskService.getById(id);
-        return (task != null && task.getUserId().equals(userId)) ? task : null;
-    }
-
     // 根据用户ID查询任务
     @GetMapping("/user")
     public List<Task> getTaskByUserId(@RequestHeader("Authorization") String authHeader) {
@@ -43,7 +33,6 @@ public class TaskController {
     public void createTask(@RequestBody Task task, @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);  // 提取JWT token
         Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
-
         task.setUserId(userId);  // 设置任务的userId
         taskService.save(task);
     }
@@ -54,14 +43,42 @@ public class TaskController {
         String token = authHeader.substring(7);  // 提取JWT token
         Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
 
+        // 获取现有任务
         Task existingTask = taskService.getById(id);
         if (existingTask != null && existingTask.getUserId().equals(userId)) {
+            // 确保任务的userId不被更改
             task.setId(id);
-            task.setUserId(userId);  // 确保任务的userId不被更改
+            task.setUserId(userId);
+
+            // 检查每个字段，如果请求中的字段为空，则保留现有值
+            if (task.getName() == null || task.getName().isEmpty()) {
+                task.setName(existingTask.getName());
+            }
+            if (task.getDetail() == null || task.getDetail().isEmpty()) {
+                task.setDetail(existingTask.getDetail());
+            }
+            if (task.getPriority() == null || task.getPriority().isEmpty()) {
+                task.setPriority(existingTask.getPriority());
+            }
+            if (task.getDate1() == null) {
+                task.setDate1(existingTask.getDate1());
+            }
+            if (task.getDate2() == null) {
+                task.setDate2(existingTask.getDate2());
+            }
+            if (task.getStatus() == null || task.getStatus().isEmpty()) {
+                task.setStatus(existingTask.getStatus());
+            }
+            if (task.getTypeId() == null) {
+                task.setTypeId(existingTask.getTypeId());
+            }
+
+            // 更新任务
             return taskService.updateById(task);
         }
         return false;
     }
+
 
     // 删除任务
     @DeleteMapping("/{id}")

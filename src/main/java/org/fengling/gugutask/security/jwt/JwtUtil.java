@@ -62,8 +62,8 @@ public class JwtUtil {
 
     // 创建token
     private String createToken(Map<String, Object> claims, String subject) {
-        // 1 小时的过期时间
-        long jwtExpirationMs = 1000 * 60 * 60;
+        // 10 天的过期时间
+        long jwtExpirationMs = 1000 * 60 * 60 * 24 * 10;
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)

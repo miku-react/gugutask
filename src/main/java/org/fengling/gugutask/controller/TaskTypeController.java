@@ -18,21 +18,15 @@ public class TaskTypeController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    // 查询所有任务类型
-    @GetMapping
-    public List<TaskType> getAllTaskTypes() {
-        return taskTypeService.list();
-    }
-
     // 根据ID查询任务类型，校验是否属于该用户
-    @GetMapping("/{id}")
-    public TaskType getTaskTypeById(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
+    @GetMapping("/mine")
+    public List<TaskType> getTaskTypeById(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);  // 提取JWT token
         Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
 
-        TaskType taskType = taskTypeService.getById(id);
-        if (taskType != null && taskType.getUserId() != null && taskType.getUserId().equals(userId)) {
-            return taskType;
+        List<TaskType> taskTypes = taskTypeService.findTaskTypesByUserId(userId);
+        if (taskTypes != null) {
+            return taskTypes;
         }
         return null;
     }

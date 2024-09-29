@@ -12,8 +12,12 @@ import java.util.Set;
 public interface UserService extends IService<User> {
     User findByUsername(String username);
 
+    User findByUserId(Long userId);
+
     List<String> findRolesByUserId(Long userId);
-    
+
     // 新增方法，获取用户的角色和权限，并转换为Spring Security的GrantedAuthority对象
     Set<GrantedAuthority> getUserAuthorities(Long userId);
+
+    void deleteUserById(Long userId);
 }

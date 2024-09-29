@@ -11,4 +11,6 @@ public interface TaskTypeService extends IService<TaskType> {
 
     // 给每个用户创建默认类型
     void createDefaultTaskTypesForUser(Long userId);
+
+    void removeByUserId(Long userId);
 }

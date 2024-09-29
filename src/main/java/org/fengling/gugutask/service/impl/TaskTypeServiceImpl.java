@@ -27,5 +27,12 @@ public class TaskTypeServiceImpl extends ServiceImpl<TaskTypeMapper, TaskType> i
         taskTypeMapper.insert(new TaskType("生活", userId));
         taskTypeMapper.insert(new TaskType("真的特别", userId));
     }
+
+    @Override
+    public void removeByUserId(Long userId) {
+        taskTypeMapper.deleteByUserId(userId);
+    }
+
+
 }
 

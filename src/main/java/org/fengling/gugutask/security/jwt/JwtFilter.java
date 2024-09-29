@@ -70,10 +70,10 @@ public class JwtFilter implements Filter {
                 return;
             }
         }
+        System.out.println("Authentication: " + SecurityContextHolder.getContext().getAuthentication());
 
         // 放行请求到下一个过滤器或处理器
         chain.doFilter(request, response);
-        System.out.println("Authentication: " + SecurityContextHolder.getContext().getAuthentication());
     }
 
     @Override
