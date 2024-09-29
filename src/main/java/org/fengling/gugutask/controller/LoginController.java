@@ -57,7 +57,7 @@ public class LoginController {
         List<String> roles = userService.findRolesByUserId(user.getId());
 
         // 生成JWT Token
-        String token = jwtUtil.generateToken(user.getUsername(), roles);
+        String token = jwtUtil.generateToken(user.getUsername(), user.getId(), roles);
 
         // 返回token给客户端
         Map<String, String> response = new HashMap<>();

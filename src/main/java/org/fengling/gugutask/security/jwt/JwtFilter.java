@@ -4,11 +4,13 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class JwtFilter implements Filter {
@@ -52,10 +54,11 @@ public class JwtFilter implements Filter {
         // 如果 token 存在，且未进行过身份认证，则进行 token 验证
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             if (jwtUtil.validateToken(token, username)) {  // 验证 token 是否有效
-                // 创建 UsernamePasswordAuthenticationToken 并注入 Spring Security 上下文
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        username, null, jwtUtil.getAuthorities(token)
-                );
+                Long userId = jwtUtil.extractUserId(token);  // 从 token 中提取userId
+                List<GrantedAuthority> authorities = jwtUtil.getAuthorities(token);
+
+                // 创建 UsernamePasswordAuthenticationToken，包含 userId, username 和权限
+                UsernamePasswordAuthenticationToken authenticationToken = new JwtToken(userId, jwtUtil.getAuthorities(token), token);
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpRequest));
 
                 // 设置认证信息到 Spring Security 上下文
@@ -71,7 +74,6 @@ public class JwtFilter implements Filter {
         // 放行请求到下一个过滤器或处理器
         chain.doFilter(request, response);
         System.out.println("Authentication: " + SecurityContextHolder.getContext().getAuthentication());
-
     }
 
     @Override

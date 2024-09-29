@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/admin/")
-public class AdminController {
+@RequestMapping("/api/admin/users")
+public class AdminUsersController {
 
     @Autowired
     private UserService userService;
@@ -28,7 +28,6 @@ public class AdminController {
     }
 
     // 创建用户 (仅管理员可访问)
-
     @PostMapping
     public User createUser(@RequestBody User user) {
         userService.save(user);

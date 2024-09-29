@@ -21,7 +21,6 @@ public class JwtUtil {
 
     // 使用 jjwt 0.11.x API 创建签名密钥
     private final SecretKey secretKey = Keys.hmacShaKeyFor("mochalifemochalifemochalifemochalife".getBytes());
-    private final long jwtExpirationMs = 1000 * 60 * 60; // 1 小时的过期时间
 
     // 从token中提取用户名
     public String extractUsername(String token) {
@@ -54,14 +53,17 @@ public class JwtUtil {
     }
 
     // 生成token
-    public String generateToken(String username, List<String> roles) {
+    public String generateToken(String username, Long userId, List<String> roles) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", roles); // 将用户的角色信息放入token的claims中
+        claims.put("userId", userId); // 将用户的ID信息放入token的claims中
         return createToken(claims, username);
     }
 
     // 创建token
     private String createToken(Map<String, Object> claims, String subject) {
+        // 1 小时的过期时间
+        long jwtExpirationMs = 1000 * 60 * 60;
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)
@@ -85,5 +87,10 @@ public class JwtUtil {
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role))  // 加上 "ROLE_"
                 .collect(Collectors.toList());
     }
+
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId", Long.class));
+    }
+
 
 }

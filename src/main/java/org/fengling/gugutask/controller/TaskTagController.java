@@ -2,6 +2,7 @@ package org.fengling.gugutask.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.fengling.gugutask.pojo.TaskTag;
+import org.fengling.gugutask.security.jwt.JwtUtil;
 import org.fengling.gugutask.service.TagService;
 import org.fengling.gugutask.service.TaskService;
 import org.fengling.gugutask.service.TaskTagService;
@@ -23,9 +24,15 @@ public class TaskTagController {
     @Autowired
     private TagService tagService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     // 查询某个任务的所有标签
     @GetMapping("/task/{taskId}")
-    public List<TaskTag> getTagsByTaskId(@PathVariable Long taskId, @RequestParam Long userId) {
+    public List<TaskTag> getTagsByTaskId(@PathVariable Long taskId, @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);  // 提取JWT token
+        Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
+
         // 校验任务是否属于该用户
         if (!taskService.getById(taskId).getUserId().equals(userId)) {
             throw new RuntimeException("任务不属于该用户");
@@ -35,7 +42,10 @@ public class TaskTagController {
 
     // 查询某个标签下的所有任务，校验 userId
     @GetMapping("/tag/{tagId}")
-    public List<TaskTag> getTasksByTagId(@PathVariable Long tagId, @RequestParam Long userId) {
+    public List<TaskTag> getTasksByTagId(@PathVariable Long tagId, @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);  // 提取JWT token
+        Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
+
         // 校验标签是否属于该用户
         if (!tagService.getById(tagId).getUserId().equals(userId)) {
             throw new RuntimeException("标签不属于该用户");
@@ -45,7 +55,10 @@ public class TaskTagController {
 
     // 给任务添加标签，校验 userId
     @PostMapping
-    public boolean addTaskTag(@RequestBody TaskTag taskTag, @RequestParam Long userId) {
+    public boolean addTaskTag(@RequestBody TaskTag taskTag, @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);  // 提取JWT token
+        Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
+
         // 校验任务和标签是否属于该用户
         if (!taskService.getById(taskTag.getTaskId()).getUserId().equals(userId) ||
                 !tagService.getById(taskTag.getTagId()).getUserId().equals(userId)) {
@@ -56,7 +69,10 @@ public class TaskTagController {
 
     // 删除任务的某个标签，校验 userId
     @DeleteMapping("/{taskId}/{tagId}")
-    public boolean deleteTaskTag(@PathVariable Long taskId, @PathVariable Long tagId, @RequestParam Long userId) {
+    public boolean deleteTaskTag(@PathVariable Long taskId, @PathVariable Long tagId, @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);  // 提取JWT token
+        Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
+
         // 校验任务和标签是否属于该用户
         if (!taskService.getById(taskId).getUserId().equals(userId) ||
                 !tagService.getById(tagId).getUserId().equals(userId)) {

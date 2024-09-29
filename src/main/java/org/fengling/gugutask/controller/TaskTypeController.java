@@ -1,6 +1,7 @@
 package org.fengling.gugutask.controller;
 
 import org.fengling.gugutask.pojo.TaskType;
+import org.fengling.gugutask.security.jwt.JwtUtil;
 import org.fengling.gugutask.service.TaskTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,9 @@ public class TaskTypeController {
     @Autowired
     private TaskTypeService taskTypeService;
 
+    @Autowired
+    private JwtUtil jwtUtil;
+
     // 查询所有任务类型
     @GetMapping
     public List<TaskType> getAllTaskTypes() {
@@ -22,7 +26,10 @@ public class TaskTypeController {
 
     // 根据ID查询任务类型，校验是否属于该用户
     @GetMapping("/{id}")
-    public TaskType getTaskTypeById(@PathVariable Long id, @RequestParam Long userId) {
+    public TaskType getTaskTypeById(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);  // 提取JWT token
+        Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
+
         TaskType taskType = taskTypeService.getById(id);
         if (taskType != null && taskType.getUserId() != null && taskType.getUserId().equals(userId)) {
             return taskType;
@@ -32,19 +39,25 @@ public class TaskTypeController {
 
     // 创建新的任务类型，并设置userId
     @PostMapping
-    public String createTaskType(@RequestBody TaskType taskType, @RequestParam Long userId) {
-        taskType.setUserId(userId); // 设置userId
+    public String createTaskType(@RequestBody TaskType taskType, @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);  // 提取JWT token
+        Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
+
+        taskType.setUserId(userId);  // 设置userId
         taskTypeService.save(taskType);
         return "Task type created successfully!";
     }
 
     // 更新任务类型，确保只能更新属于该用户的任务类型
     @PutMapping("/{id}")
-    public String updateTaskType(@PathVariable Long id, @RequestBody TaskType taskType, @RequestParam Long userId) {
+    public String updateTaskType(@PathVariable Long id, @RequestBody TaskType taskType, @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);  // 提取JWT token
+        Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
+
         TaskType existingTaskType = taskTypeService.getById(id);
         if (existingTaskType != null && existingTaskType.getUserId() != null && existingTaskType.getUserId().equals(userId)) {
             taskType.setId(id);
-            taskType.setUserId(userId); // 确保userId保持一致
+            taskType.setUserId(userId);  // 确保userId保持一致
             taskTypeService.updateById(taskType);
             return "Task type updated successfully!";
         }
@@ -53,7 +66,10 @@ public class TaskTypeController {
 
     // 删除任务类型，确保只能删除属于该用户的任务类型
     @DeleteMapping("/{id}")
-    public String deleteTaskType(@PathVariable Long id, @RequestParam Long userId) {
+    public String deleteTaskType(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);  // 提取JWT token
+        Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
+
         TaskType existingTaskType = taskTypeService.getById(id);
         if (existingTaskType != null && existingTaskType.getUserId() != null && existingTaskType.getUserId().equals(userId)) {
             taskTypeService.removeById(id);
@@ -63,8 +79,11 @@ public class TaskTypeController {
     }
 
     // 按照 userId 查找所有任务类型
-    @GetMapping("/user/{userId}")
-    public List<TaskType> getTaskTypesByUserId(@PathVariable Long userId) {
+    @GetMapping("/user")
+    public List<TaskType> getTaskTypesByUserId(@RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.substring(7);  // 提取JWT token
+        Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
+
         return taskTypeService.findTaskTypesByUserId(userId);
     }
 }
