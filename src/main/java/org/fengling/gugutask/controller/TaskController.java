@@ -3,6 +3,8 @@ package org.fengling.gugutask.controller;
 import org.fengling.gugutask.pojo.Task;
 import org.fengling.gugutask.security.jwt.JwtUtil;
 import org.fengling.gugutask.service.TaskService;
+import org.fengling.gugutask.util.SnowflakeIdGenerator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,9 +12,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/tasks")
 public class TaskController {
-
     private final TaskService taskService;
     private final JwtUtil jwtUtil;
+    @Autowired
+    SnowflakeIdGenerator snowflakeIdGenerator;
 
     public TaskController(TaskService taskService, JwtUtil jwtUtil) {
         this.taskService = taskService;
@@ -34,6 +37,7 @@ public class TaskController {
         String token = authHeader.substring(7);  // 提取JWT token
         Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
         task.setUserId(userId);  // 设置任务的userId
+        task.setId(snowflakeIdGenerator.generateId());
         taskService.save(task);
     }
 

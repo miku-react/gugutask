@@ -3,6 +3,7 @@ package org.fengling.gugutask.controller;
 import org.fengling.gugutask.pojo.Tag;
 import org.fengling.gugutask.security.jwt.JwtUtil;
 import org.fengling.gugutask.service.TagService;
+import org.fengling.gugutask.util.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,8 +14,9 @@ import java.util.List;
 public class TagController {
 
     @Autowired
+    SnowflakeIdGenerator snowflakeIdGenerator;
+    @Autowired
     private TagService tagService;
-
     @Autowired
     private JwtUtil jwtUtil;
 
@@ -35,6 +37,7 @@ public class TagController {
         Long userId = jwtUtil.extractUserId(token); // 从JWT中提取userId
 
         tag.setUserId(userId);  // 设置userId到tag对象中
+        tag.setId(snowflakeIdGenerator.generateId());
         return tagService.save(tag);
     }
 

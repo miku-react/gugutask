@@ -3,6 +3,7 @@ package org.fengling.gugutask.controller;
 import org.fengling.gugutask.pojo.TaskType;
 import org.fengling.gugutask.security.jwt.JwtUtil;
 import org.fengling.gugutask.service.TaskTypeService;
+import org.fengling.gugutask.util.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,8 +14,9 @@ import java.util.List;
 public class TaskTypeController {
 
     @Autowired
+    SnowflakeIdGenerator snowflakeIdGenerator;
+    @Autowired
     private TaskTypeService taskTypeService;
-
     @Autowired
     private JwtUtil jwtUtil;
 
@@ -24,11 +26,7 @@ public class TaskTypeController {
         String token = authHeader.substring(7);  // 提取JWT token
         Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
 
-        List<TaskType> taskTypes = taskTypeService.findTaskTypesByUserId(userId);
-        if (taskTypes != null) {
-            return taskTypes;
-        }
-        return null;
+        return taskTypeService.findTaskTypesByUserId(userId);
     }
 
     // 创建新的任务类型，并设置userId
@@ -36,8 +34,10 @@ public class TaskTypeController {
     public String createTaskType(@RequestBody TaskType taskType, @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);  // 提取JWT token
         Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
-
-        taskType.setUserId(userId);  // 设置userId
+        // 设置userId
+        taskType.setUserId(userId);
+        //设置任务ID
+        taskType.setId(snowflakeIdGenerator.generateId());
         taskTypeService.save(taskType);
         return "Task type created successfully!";
     }
