@@ -64,6 +64,36 @@ public class AuthController {
         return R.success(response);
     }
 
+    // 通过Token登录的接口
+    @PostMapping("/token-login")
+    public R<Map<String, String>> tokenLogin(@RequestBody Map<String, String> request) {
+        String token = request.get("token");
+
+        // 验证Token是否合法并获取用户名
+        String username = jwtUtil.extractUsername(token);
+        if (username == null || !jwtUtil.validateToken(token, username)) {
+            return R.unauthorized("Token无效或已过期哦~");
+        }
+
+        // 根据用户名查找用户
+        User user = userService.findByUsername(username);
+        if (user == null) {
+            return R.unauthorized("用户不存在");
+        }
+
+        // 获取用户角色信息
+        List<String> roles = userService.findRolesByUserId(user.getId());
+
+        // 为用户生成新的JWT Token
+        String newToken = jwtUtil.generateToken(user.getUsername(), user.getId(), roles);
+
+        // 返回新Token
+        Map<String, String> response = new HashMap<>();
+        response.put("token", newToken);
+
+        return R.success(response);
+    }
+
     // 注册接口
     @PostMapping("/register")
     public R<String> registerUser(@RequestBody User user) {
@@ -100,7 +130,7 @@ public class AuthController {
 
             // 返回注册成功状态
             return R.success("用户注册成功，并赋予USER角色");
-            
+
         } catch (Exception e) {
             // 捕获其他异常
             return R.error("服务器错误: " + e.getMessage());
