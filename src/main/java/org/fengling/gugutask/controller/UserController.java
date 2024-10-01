@@ -42,7 +42,7 @@ public class UserController {
         }
 
         // 如果用户未找到，返回404错误
-        return R.notFound("User not found");
+        return R.notFound("用户没找到");
     }
 
     // 更新用户自己的信息
@@ -53,14 +53,16 @@ public class UserController {
 
         User currentUser = userService.findByUserId(userId);
         if (currentUser == null) {
-            return R.notFound("User not found");
+            return R.notFound("没有这个用户ID");
         }
 
         User existingUser = userService.findByUsername(user.getUsername());
         if (existingUser != null && !existingUser.getId().equals(currentUser.getId())) {
-            return R.error("Username is already taken");
+            return R.error("用户名已被注册啦");
         }
-
+        if (userService.findByEmail(user.getEmail()) != null) {
+            return R.error("邮箱已被注册");
+        }
         user.setId(currentUser.getId());
 
         if (user.getUsername() == null || user.getUsername().isEmpty()) {
@@ -101,8 +103,8 @@ public class UserController {
         User currentUser = userService.findByUsername(username);
         if (currentUser != null) {
             userService.deleteUserById(currentUser.getId());
-            return R.success("User account deleted successfully.");
+            return R.success("有缘再见！");
         }
-        return R.notFound("User not found.");
+        return R.notFound("没有找到这个用户哦");
     }
 }

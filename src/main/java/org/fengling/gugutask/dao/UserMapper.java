@@ -10,6 +10,10 @@ import java.util.List;
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
 
+    //通过邮箱查找用户
+    @Select("SELECT * FROM users WHERE email = #{email}")
+    User findByEmail(String email);
+
     // 通过用户名查找用户
     @Select("SELECT * FROM users WHERE username = #{username}")
     User findByUsername(String username);

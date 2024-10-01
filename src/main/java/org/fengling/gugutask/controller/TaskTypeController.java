@@ -34,7 +34,7 @@ public class TaskTypeController {
         //设置任务ID
         taskType.setId(snowflakeIdGenerator.generateId());
         taskTypeService.save(taskType);
-        return R.success("Task type created successfully!");
+        return R.success("哦~成功啦！");
     }
 
     // 更新任务类型，确保只能更新属于该用户的任务类型
@@ -48,9 +48,9 @@ public class TaskTypeController {
             taskType.setId(id);
             taskType.setUserId(userId);  // 确保userId保持一致
             taskTypeService.updateById(taskType);
-            return R.success("Task type updated successfully!");
+            return R.success("更新~成功！");
         }
-        return R.forbidden("You are not allowed to update this task type.");
+        return R.forbidden("Token出问题了哦？没有这个用户");
     }
 
     // 删除任务类型，确保只能删除属于该用户的任务类型
@@ -62,9 +62,9 @@ public class TaskTypeController {
         TaskType existingTaskType = taskTypeService.getById(id);
         if (existingTaskType != null && existingTaskType.getUserId() != null && existingTaskType.getUserId().equals(userId)) {
             taskTypeService.removeById(id);
-            return R.success("Task type deleted successfully!");
+            return R.success("删除~成功！");
         }
-        return R.forbidden("You are not allowed to delete this task type.");
+        return R.forbidden("Token出问题了哦？没有这个用户");
     }
 
     // 按照 userId 查找所有任务类型

@@ -12,6 +12,8 @@ import java.util.Set;
 public interface UserService extends IService<User> {
     User findByUsername(String username);
 
+    User findByEmail(String email);
+
     User findByUserId(Long userId);
 
     List<String> findRolesByUserId(Long userId);

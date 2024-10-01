@@ -57,7 +57,9 @@ public class AdminUsersController {
         if (userService.findByUsername(user.getUsername()) != null) {
             return R.error("用户名已存在");
         }
-
+        if (userService.findByEmail(user.getEmail()) != null) {
+            return R.error("邮箱已被注册");
+        }
         // 对密码进行加密
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             String encryptedPassword = passwordEncoder.encode(user.getPassword());
@@ -85,7 +87,9 @@ public class AdminUsersController {
         if (userWithSameUsername != null && !userWithSameUsername.getId().equals(id)) {
             return R.error("用户名已被使用");
         }
-
+        if (userService.findByEmail(user.getEmail()) != null) {
+            return R.error("邮箱已被注册");
+        }
         // 保持用户ID一致
         user.setId(id);
 

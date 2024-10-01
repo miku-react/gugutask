@@ -126,7 +126,7 @@ public class TaskController {
             if (task.getTypeId() == null) task.setTypeId(existingTask.getTypeId());
 
             taskService.updateById(task);
-            return R.success("任务更新成功");
+            return R.success("更新~成功！");
         }
         return R.forbidden("无权限更新此任务");
     }
@@ -141,7 +141,7 @@ public class TaskController {
         Task existingTask = taskService.getById(id);
         if (existingTask != null && existingTask.getUserId().equals(userId)) {
             taskService.removeById(id);
-            return R.success("任务删除成功");
+            return R.success("删除~成功！");
         }
         return R.forbidden("无权限删除此任务");
     }

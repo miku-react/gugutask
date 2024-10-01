@@ -67,35 +67,44 @@ public class AuthController {
     // 注册接口
     @PostMapping("/register")
     public R<String> registerUser(@RequestBody User user) {
-        // 检查用户名是否存在
-        if (userService.findByUsername(user.getUsername()) != null) {
-            return R.error("用户名已被注册");
+        try {
+            // 检查用户名是否存在
+            if (userService.findByUsername(user.getUsername()) != null) {
+                return R.error("用户名已被注册");
+            }
+            if (userService.findByEmail(user.getEmail()) != null) {
+                return R.error("邮箱已被注册");
+            }
+            // 生成用户ID
+            user.setId(snowflakeIdGenerator.generateId());
+
+            // 对密码进行加密
+            String encryptedPassword = passwordEncoder.encode(user.getPassword());
+            user.setPassword(encryptedPassword);
+
+            // 保存用户到数据库
+            userService.save(user); // 保存后 user 会有 id
+
+            // 查找USER角色的ID
+            Role userRole = roleService.findByRoleName("USER");
+            if (userRole == null) {
+                return R.error("USER角色未找到");
+            }
+
+            // 将用户角色关联到user_roles表中
+            UserRole userRoleAssociation = new UserRole(user.getId(), userRole.getId());
+            userRoleService.save(userRoleAssociation);
+
+            // 为新用户创建默认的任务类型
+            taskTypeService.createDefaultTaskTypesForUser(user.getId());
+
+            // 返回注册成功状态
+            return R.success("用户注册成功，并赋予USER角色");
+            
+        } catch (Exception e) {
+            // 捕获其他异常
+            return R.error("服务器错误: " + e.getMessage());
         }
-
-        // 生成用户ID
-        user.setId(snowflakeIdGenerator.generateId());
-
-        // 对密码进行加密
-        String encryptedPassword = passwordEncoder.encode(user.getPassword());
-        user.setPassword(encryptedPassword);
-
-        // 保存用户到数据库
-        userService.save(user); // 保存后 user 会有 id
-
-        // 查找USER角色的ID
-        Role userRole = roleService.findByRoleName("USER");
-        if (userRole == null) {
-            return R.error("USER角色未找到");
-        }
-
-        // 将用户角色关联到user_roles表中
-        UserRole userRoleAssociation = new UserRole(user.getId(), userRole.getId());
-        userRoleService.save(userRoleAssociation);
-
-        // 为新用户创建默认的任务类型
-        taskTypeService.createDefaultTaskTypesForUser(user.getId());
-
-        // 返回注册成功状态
-        return R.success("用户注册成功，并赋予USER角色");
     }
+
 }

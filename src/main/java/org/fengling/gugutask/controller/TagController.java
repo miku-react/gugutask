@@ -50,9 +50,9 @@ public class TagController {
         tag.setId(snowflakeIdGenerator.generateId());
 
         if (tagService.save(tag)) {
-            return R.success("标签创建成功");
+            return R.success("创建~成功！");
         } else {
-            return R.error("标签创建失败");
+            return R.error("创建..失败...");
         }
     }
 
@@ -68,9 +68,9 @@ public class TagController {
             tag.setUserId(userId);  // 确保userId一致
 
             if (tagService.updateById(tag)) {
-                return R.success("标签更新成功");
+                return R.success("更新~成功!");
             } else {
-                return R.error("标签更新失败");
+                return R.error("更新..失败...");
             }
         } else {
             return R.forbidden("标签不属于该用户或不存在");
@@ -86,9 +86,9 @@ public class TagController {
         Tag existingTag = tagService.getById(id);
         if (existingTag != null && existingTag.getUserId().equals(userId)) {
             if (tagService.removeById(id)) {
-                return R.success("标签删除成功");
+                return R.success("删除~成功!");
             } else {
-                return R.error("标签删除失败");
+                return R.error("删除..失败...");
             }
         } else {
             return R.forbidden("标签不属于该用户或不存在");
