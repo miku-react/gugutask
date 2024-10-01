@@ -4,6 +4,7 @@ import org.fengling.gugutask.security.CustomUserDetailsService;
 import org.fengling.gugutask.security.jwt.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -42,6 +43,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // 禁用 CSRF，对于使用 JWT 的无状态 API 应该禁用
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // 放行登录相关接口
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 允许所有 OPTIONS 请求
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")  // 需要 ADMIN 角色的接口
                         .anyRequest().authenticated()) // 其他接口需要身份验证
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // 添加 JWT 过滤器
@@ -56,7 +58,7 @@ public class SecurityConfig {
         config.setAllowedOrigins(List.of("*")); // 设置前端的URL
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true); // 允许携带凭证，如 Authorization 头
+        config.setAllowCredentials(false);
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
