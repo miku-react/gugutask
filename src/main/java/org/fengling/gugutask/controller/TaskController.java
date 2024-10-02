@@ -1,12 +1,7 @@
 package org.fengling.gugutask.controller;
 
-import org.fengling.gugutask.dto.TagD;
-import org.fengling.gugutask.dto.TaskD;
-import org.fengling.gugutask.dto.TaskTypeD;
-import org.fengling.gugutask.pojo.Tag;
+import org.fengling.gugutask.dto.TaskDetailsD;
 import org.fengling.gugutask.pojo.Task;
-import org.fengling.gugutask.pojo.TaskTag;
-import org.fengling.gugutask.pojo.TaskType;
 import org.fengling.gugutask.security.jwt.JwtUtil;
 import org.fengling.gugutask.service.TagService;
 import org.fengling.gugutask.service.TaskService;
@@ -18,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -42,54 +36,16 @@ public class TaskController {
 
     // 根据用户ID查询任务及其标签和类型
     @GetMapping("/user")
-    public R<List<TaskD>> getTaskByUserId(@RequestHeader("Authorization") String authHeader) {
+    public R<List<TaskDetailsD>> getTaskByUserId(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);  // 提取JWT token
         Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
 
-        List<Task> tasks = taskService.getTasksByUserId(userId);
+        // 获取封装好的 TaskDetailsD
+        List<TaskDetailsD> taskDetailsDList = taskService.getTasksWithDetailsByUserId(userId);
 
-        // 将 Task 转换为 TaskD，包含标签和任务类型
-        List<TaskD> taskDList = tasks.stream().map(task -> {
-            // 获取任务的类型
-            TaskType taskType = taskTypeService.getById(task.getTypeId());
-            TaskTypeD taskTypeD = new TaskTypeD(
-                    taskType.getTypeName(),
-                    taskType.getCreatedAt(),
-                    taskType.getUpdatedAt()
-            );
-
-            // 获取任务的标签
-            List<TaskTag> taskTags = taskTagService.findTagsByTaskId(task.getId());
-            List<TagD> tagDList = taskTags.stream().map(taskTag -> {
-                // 根据 tagId 获取 Tag 对象
-                Tag tag = tagService.getById(taskTag.getTagId());
-                return new TagD(
-                        tag.getTagName(),  // 从 Tag 对象获取 tagName
-                        tag.getCreatedAt(),
-                        tag.getUpdatedAt()
-                );
-            }).collect(Collectors.toList());
-
-
-            // 封装 TaskD 对象
-            TaskD taskD = new TaskD(
-                    task.getName(),
-                    task.getDetail(),
-                    task.getPriority(),
-                    task.getDate1(),
-                    task.getDate2(),
-                    task.getStatus(),
-                    tagDList,   // 设置任务标签
-                    List.of(taskTypeD), // 设置任务类型
-                    task.getCreatedAt(),
-                    task.getUpdatedAt()
-            );
-
-            return taskD;
-        }).collect(Collectors.toList());
-
-        return R.success(taskDList);
+        return R.success(taskDetailsDList);
     }
+
 
     // 创建任务
     @PostMapping

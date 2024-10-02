@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 public class TaskD {
-
+    private Long Id;
     private String name;
     private String detail;
     private String priority;
@@ -27,7 +27,8 @@ public class TaskD {
     }
 
 
-    public TaskD(String name, String detail, String priority, String date1, String date2, String status, List<TagD> tags, List<TaskTypeD> taskTypes, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public TaskD(Long Id, String name, String detail, String priority, String date1, String date2, String status, List<TagD> tags, List<TaskTypeD> taskTypes, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.Id = Id;
         this.name = name;
         this.detail = detail;
         this.priority = priority;

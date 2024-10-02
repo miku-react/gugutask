@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Select;
 import org.fengling.gugutask.pojo.Task;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface TaskMapper extends BaseMapper<Task> {
@@ -19,4 +20,20 @@ public interface TaskMapper extends BaseMapper<Task> {
     // 根据 userId 删除 tasks 中的记录
     @Delete("DELETE FROM tasks WHERE user_id = #{userId}")
     void deleteByUserId(@Param("userId") Long userId);
+
+    @Select("SELECT t.*, tt.id AS type_id, tt.type_name, tt.created_at AS type_created_at, tt.updated_at AS type_updated_at, " +
+            "tag.id AS tag_id, tag.tag_name, tag.created_at AS tag_created_at, tag.updated_at AS tag_updated_at " +
+            "FROM tasks t " +
+            "LEFT JOIN task_types tt ON t.type_id = tt.id " +
+            "LEFT JOIN task_tags ttg ON t.id = ttg.task_id " +
+            "LEFT JOIN tags tag ON ttg.tag_id = tag.id " +
+            "WHERE t.user_id = #{userId}")
+    List<Map<String, Object>> getTasksWithDetailsByUserId(Long userId);
+
+
+    @Select("SELECT tag.id, tag.tag_name, tag.created_at, tag.updated_at " +
+            "FROM tags tag " +
+            "LEFT JOIN task_tags ttg ON tag.id = ttg.tag_id " +
+            "WHERE ttg.task_id = #{taskId}")
+    List<Map<String, Object>> findTagsByTaskId(Long taskId);
 }

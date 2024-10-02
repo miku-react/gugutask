@@ -7,6 +7,7 @@ import java.time.LocalDateTime;
 
 @Data
 public class TagD {
+    private Long Id;
     private String tagName;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime createdAt;
@@ -16,7 +17,8 @@ public class TagD {
     public TagD() {
     }
 
-    public TagD(String tagName, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public TagD(Long Id, String tagName, LocalDateTime createdAt, LocalDateTime updatedAt) {
+        this.Id = Id;
         this.tagName = tagName;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;

@@ -33,7 +33,7 @@ public class TagController {
 
         Tag tag = tagService.getById(id);
         if (tag != null && tag.getUserId().equals(userId)) {
-            TagD tagD = new TagD(tag.getTagName(), tag.getCreatedAt(), tag.getUpdatedAt());
+            TagD tagD = new TagD(tag.getId(), tag.getTagName(), tag.getCreatedAt(), tag.getUpdatedAt());
             return R.success(tagD);
         } else {
             return R.forbidden("标签不属于该用户或不存在");
@@ -104,7 +104,7 @@ public class TagController {
         List<Tag> tags = tagService.findTagsByUserId(userId);
         if (tags != null && !tags.isEmpty()) {
             List<TagD> tagDList = tags.stream()
-                    .map(tag -> new TagD(tag.getTagName(), tag.getCreatedAt(), tag.getUpdatedAt()))
+                    .map(tag -> new TagD(tag.getId(), tag.getTagName(), tag.getCreatedAt(), tag.getUpdatedAt()))
                     .collect(Collectors.toList());
             return R.success(tagDList);
         } else {

@@ -57,6 +57,7 @@ public class TaskTagController {
         List<TagD> tagDList = taskTags.stream().map(taskTag -> {
             Tag tag = tagService.getById(taskTag.getTagId());
             return new TagD(
+                    tag.getId(),
                     tag.getTagName(),
                     tag.getCreatedAt(),
                     tag.getUpdatedAt()
@@ -97,6 +98,7 @@ public class TaskTagController {
             List<TagD> tagDList = taskTagsForTask.stream().map(taskTagForTask -> {
                 Tag tagForTask = tagService.getById(taskTagForTask.getTagId());
                 return new TagD(
+                        tagForTask.getId(),
                         tagForTask.getTagName(),
                         tagForTask.getCreatedAt(),
                         tagForTask.getUpdatedAt()
@@ -105,6 +107,7 @@ public class TaskTagController {
 
             // 封装 TaskD 对象
             return new TaskD(
+                    task.getId(),
                     task.getName(),
                     task.getDetail(),
                     task.getPriority(),
