@@ -77,7 +77,7 @@ public class TaskTypeController {
 
         // 转换为 TaskTypeD
         List<TaskTypeD> taskTypeDList = taskTypes.stream().map(taskType ->
-                new TaskTypeD(taskType.getTypeName(), taskType.getCreatedAt(), taskType.getUpdatedAt())
+                new TaskTypeD(taskType.getId(), taskType.getTypeName(), taskType.getCreatedAt(), taskType.getUpdatedAt())
         ).collect(Collectors.toList());
 
         return R.success(taskTypeDList);  // 返回封装的成功数据
