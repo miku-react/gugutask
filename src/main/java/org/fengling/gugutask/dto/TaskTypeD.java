@@ -24,6 +24,7 @@ public class TaskTypeD {
         this.updatedAt = updatedAt;
     }
 
+
     public TaskTypeD(Long taskTypeId, String typeName, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.taskTypeId = taskTypeId;
         this.typeName = typeName;
@@ -31,4 +32,6 @@ public class TaskTypeD {
         this.updatedAt = updatedAt;
 
     }
+
+
 }

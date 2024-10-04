@@ -1,8 +1,11 @@
 package org.fengling.gugutask.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.fengling.gugutask.dto.TaskTypeD;
+import org.fengling.gugutask.pojo.Task;
 import org.fengling.gugutask.pojo.TaskType;
 import org.fengling.gugutask.security.jwt.JwtUtil;
+import org.fengling.gugutask.service.TaskService;
 import org.fengling.gugutask.service.TaskTypeService;
 import org.fengling.gugutask.util.R;
 import org.fengling.gugutask.util.SnowflakeIdGenerator;
@@ -19,14 +22,15 @@ public class TaskTypeController {
     @Autowired
     SnowflakeIdGenerator snowflakeIdGenerator;
     @Autowired
+    TaskService taskService;
+    @Autowired
     private TaskTypeService taskTypeService;
     @Autowired
     private JwtUtil jwtUtil;
 
-
     // 创建新的任务类型，并设置userId
     @PostMapping
-    public R<String> createTaskType(@RequestBody TaskType taskType, @RequestHeader("Authorization") String authHeader) {
+    public R<TaskTypeD> createTaskType(@RequestBody TaskType taskType, @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);  // 提取JWT token
         Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
         // 设置userId
@@ -34,7 +38,10 @@ public class TaskTypeController {
         //设置任务ID
         taskType.setId(snowflakeIdGenerator.generateId());
         taskTypeService.save(taskType);
-        return R.success("哦~成功啦！");
+        TaskTypeD taskTypeD = new TaskTypeD(
+                taskType.getId(), taskType.getTypeName(), taskType.getCreatedAt(), taskType.getUpdatedAt()
+        );
+        return R.success(taskTypeD);
     }
 
     // 更新任务类型，确保只能更新属于该用户的任务类型
@@ -61,11 +68,23 @@ public class TaskTypeController {
 
         TaskType existingTaskType = taskTypeService.getById(id);
         if (existingTaskType != null && existingTaskType.getUserId() != null && existingTaskType.getUserId().equals(userId)) {
+            // 先查找所有属于该任务类型的任务
+            List<Task> relatedTasks = taskService.list(new QueryWrapper<Task>().eq("type_id", id));
+
+            // 删除找到的所有任务
+            if (!relatedTasks.isEmpty()) {
+                for (Task task : relatedTasks) {
+                    taskService.removeById(task.getId());
+                }
+            }
+
+            // 删除任务类型
             taskTypeService.removeById(id);
-            return R.success("删除~成功！");
+            return R.success("任务和任务类型删除~成功！");
         }
         return R.forbidden("Token出问题了哦？没有这个用户");
     }
+
 
     // 按照 userId 查找所有任务类型
     @GetMapping("/mine")
