@@ -3,6 +3,7 @@ package org.fengling.gugutask.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.fengling.gugutask.dto.TagD;
 import org.fengling.gugutask.dto.TaskD;
+import org.fengling.gugutask.dto.TaskTagD;
 import org.fengling.gugutask.dto.TaskTypeD;
 import org.fengling.gugutask.pojo.Tag;
 import org.fengling.gugutask.pojo.Task;
@@ -122,7 +123,7 @@ public class TaskTagController {
 
     // 给任务添加标签，校验 userId
     @PostMapping
-    public R<String> addTaskTag(@RequestBody TaskTag taskTag, @RequestHeader("Authorization") String authHeader) {
+    public R<TaskTagD> addTaskTag(@RequestBody TaskTag taskTag, @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);  // 提取JWT token
         Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
 
@@ -133,7 +134,8 @@ public class TaskTagController {
         }
 
         taskTagService.save(taskTag);
-        return R.success("任务标签添加成功");
+        TaskTagD taskTagD = new TaskTagD(taskTag.getTaskId(), taskTag.getTagId());
+        return R.success(taskTagD);
     }
 
     // 删除任务的某个标签，校验 userId
@@ -148,7 +150,7 @@ public class TaskTagController {
             return R.forbidden("任务或标签不属于该用户");
         }
 
-        taskTagService.removeById(new QueryWrapper<TaskTag>().eq("task_id", taskId).eq("tag_id", tagId));
+        taskTagService.remove(new QueryWrapper<TaskTag>().eq("task_id", taskId).eq("tag_id", tagId));
         return R.success("任务标签删除成功");
     }
 }

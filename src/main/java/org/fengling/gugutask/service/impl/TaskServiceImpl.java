@@ -37,8 +37,8 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
 
 
     @Override
-    public List<TaskDetailsD> getTasksWithDetailsByUserId(Long userId) {
-        List<Map<String, Object>> taskDataList = taskMapper.getTasksWithDetailsByUserId(userId);
+    public List<TaskDetailsD> getTasksWithDetailsByUserIdAndType(Long userId, Long typeId) {
+        List<Map<String, Object>> taskDataList = taskMapper.getTasksWithDetailsByUserIdAndType(userId, typeId);
 
         // 创建日期和时间的格式化器
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");

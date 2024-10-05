@@ -1,7 +1,11 @@
 package org.fengling.gugutask.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import org.fengling.gugutask.dto.TaskDetailsD;
 import org.fengling.gugutask.pojo.Task;
+import org.fengling.gugutask.pojo.TaskTag;
 import org.fengling.gugutask.security.jwt.JwtUtil;
 import org.fengling.gugutask.service.TagService;
 import org.fengling.gugutask.service.TaskService;
@@ -35,15 +39,25 @@ public class TaskController {
     }
 
     // 根据用户ID查询任务及其标签和类型
-    @GetMapping("/user")
-    public R<List<TaskDetailsD>> getTaskByUserId(@RequestHeader("Authorization") String authHeader) {
+    @GetMapping("/user/type")
+    public R<PageInfo<TaskDetailsD>> getTaskByTypeAndUserId(@RequestHeader("Authorization") String authHeader,
+                                                            @RequestParam int page, // 当前页码
+                                                            @RequestParam int size,  // 每页条数
+                                                            @RequestParam("typeId") Long typeId // 任务类型ID
+    ) {
         String token = authHeader.substring(7);  // 提取JWT token
         Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
 
-        // 获取封装好的 TaskDetailsD
-        List<TaskDetailsD> taskDetailsDList = taskService.getTasksWithDetailsByUserId(userId);
+        // 1. 开启分页查询，PageHelper 会拦截 SQL 并自动分页
+        PageHelper.startPage(page, size);
 
-        return R.success(taskDetailsDList);
+        // 2. 获取封装好的 TaskDetailsD 列表
+        List<TaskDetailsD> taskDetailsDList = taskService.getTasksWithDetailsByUserIdAndType(userId, typeId);
+
+        // 3. 使用 PageInfo 来封装分页信息
+        PageInfo<TaskDetailsD> pageInfo = new PageInfo<>(taskDetailsDList);
+
+        return R.success(pageInfo); // 返回分页数据
     }
 
 
@@ -94,11 +108,20 @@ public class TaskController {
         String token = authHeader.substring(7);  // 提取JWT token
         Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
 
+        // 1. 获取要删除的任务
         Task existingTask = taskService.getById(id);
         if (existingTask != null && existingTask.getUserId().equals(userId)) {
+
+            // 2. 删除任务的所有关联标签 (task_tags表中的记录)
+            taskTagService.remove(new QueryWrapper<TaskTag>().eq("task_id", id));
+
+            // 3. 删除任务本身 (tasks表中的记录)
             taskService.removeById(id);
-            return R.success("删除~成功！");
+
+            return R.success("任务及其关联的标签删除成功！");
         }
+
         return R.forbidden("无权限删除此任务");
     }
+
 }
