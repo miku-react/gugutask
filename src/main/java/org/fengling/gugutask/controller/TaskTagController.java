@@ -58,9 +58,7 @@ public class TaskTagController {
             Tag tag = tagService.getById(taskTag.getTagId());
             return new TagD(
                     tag.getId(),
-                    tag.getTagName(),
-                    tag.getCreatedAt(),
-                    tag.getUpdatedAt()
+                    tag.getTagName()
             );
         }).collect(Collectors.toList());
 
@@ -99,9 +97,7 @@ public class TaskTagController {
                 Tag tagForTask = tagService.getById(taskTagForTask.getTagId());
                 return new TagD(
                         tagForTask.getId(),
-                        tagForTask.getTagName(),
-                        tagForTask.getCreatedAt(),
-                        tagForTask.getUpdatedAt()
+                        tagForTask.getTagName()
                 );
             }).collect(Collectors.toList());
 

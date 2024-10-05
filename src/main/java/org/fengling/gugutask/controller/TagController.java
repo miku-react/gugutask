@@ -9,6 +9,7 @@ import org.fengling.gugutask.util.SnowflakeIdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,7 @@ public class TagController {
 
         Tag tag = tagService.getById(id);
         if (tag != null && tag.getUserId().equals(userId)) {
-            TagD tagD = new TagD(tag.getId(), tag.getTagName(), tag.getCreatedAt(), tag.getUpdatedAt());
+            TagD tagD = new TagD(tag.getId(), tag.getTagName());
             return R.success(tagD);
         } else {
             return R.forbidden("标签不属于该用户或不存在");
@@ -42,15 +43,19 @@ public class TagController {
 
     // 创建标签
     @PostMapping
-    public R<String> createTag(@RequestBody Tag tag, @RequestHeader("Authorization") String authHeader) {
+    public R<TagD> createTag(@RequestBody Tag tag, @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);  // 提取JWT token
         Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
 
         tag.setUserId(userId);  // 设置userId到tag对象中
         tag.setId(snowflakeIdGenerator.generateId());
+        tag.setCreatedAt(LocalDateTime.now());  // 设置创建时间
+        tag.setUpdatedAt(LocalDateTime.now());  // 设置更新时间
 
         if (tagService.save(tag)) {
-            return R.success("创建~成功！");
+            // 将 Tag 对象转换为 TagD DTO
+            TagD tagD = new TagD(tag.getId(), tag.getTagName());
+            return R.success(tagD);
         } else {
             return R.error("创建..失败...");
         }
@@ -58,7 +63,7 @@ public class TagController {
 
     // 更新标签
     @PutMapping("/{id}")
-    public R<String> updateTag(@PathVariable Long id, @RequestBody Tag tag, @RequestHeader("Authorization") String authHeader) {
+    public R<TagD> updateTag(@PathVariable Long id, @RequestBody Tag tag, @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);  // 提取JWT token
         Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
 
@@ -68,7 +73,9 @@ public class TagController {
             tag.setUserId(userId);  // 确保userId一致
 
             if (tagService.updateById(tag)) {
-                return R.success("更新~成功!");
+                TagD tagD = new TagD(tag.getId(), tag.getTagName());
+
+                return R.success(tagD);
             } else {
                 return R.error("更新..失败...");
             }
@@ -104,7 +111,7 @@ public class TagController {
         List<Tag> tags = tagService.findTagsByUserId(userId);
         if (tags != null && !tags.isEmpty()) {
             List<TagD> tagDList = tags.stream()
-                    .map(tag -> new TagD(tag.getId(), tag.getTagName(), tag.getCreatedAt(), tag.getUpdatedAt()))
+                    .map(tag -> new TagD(tag.getId(), tag.getTagName()))
                     .collect(Collectors.toList());
             return R.success(tagDList);
         } else {

@@ -79,8 +79,6 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
                 TagD tagD = new TagD();
                 tagD.setId((Long) tagData.get("id"));
                 tagD.setTagName((String) tagData.get("tag_name"));
-                tagD.setCreatedAt(((Timestamp) tagData.get("created_at")).toLocalDateTime());
-                tagD.setUpdatedAt(((Timestamp) tagData.get("updated_at")).toLocalDateTime());
                 return tagD;
             }).collect(Collectors.toList());
             taskDetailsD.setTags(tagDList);
