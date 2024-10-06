@@ -1,8 +1,6 @@
 package org.fengling.gugutask.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import org.fengling.gugutask.dto.TaskDetailsD;
 import org.fengling.gugutask.pojo.Task;
 import org.fengling.gugutask.pojo.TaskTag;
@@ -39,25 +37,15 @@ public class TaskController {
     }
 
     // 根据用户ID查询任务及其标签和类型
-    @GetMapping("/user/type")
-    public R<PageInfo<TaskDetailsD>> getTaskByTypeAndUserId(@RequestHeader("Authorization") String authHeader,
-                                                            @RequestParam int page, // 当前页码
-                                                            @RequestParam int size,  // 每页条数
-                                                            @RequestParam("typeId") Long typeId // 任务类型ID
-    ) {
+    @GetMapping("/user")
+    public R<List<TaskDetailsD>> getTaskByUserId(@RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);  // 提取JWT token
         Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
 
-        // 1. 开启分页查询，PageHelper 会拦截 SQL 并自动分页
-        PageHelper.startPage(page, size);
+        // 获取封装好的 TaskDetailsD
+        List<TaskDetailsD> taskDetailsDList = taskService.getTasksWithDetailsByUserId(userId);
 
-        // 2. 获取封装好的 TaskDetailsD 列表
-        List<TaskDetailsD> taskDetailsDList = taskService.getTasksWithDetailsByUserIdAndType(userId, typeId);
-
-        // 3. 使用 PageInfo 来封装分页信息
-        PageInfo<TaskDetailsD> pageInfo = new PageInfo<>(taskDetailsDList);
-
-        return R.success(pageInfo); // 返回分页数据
+        return R.success(taskDetailsDList);
     }
 
 
