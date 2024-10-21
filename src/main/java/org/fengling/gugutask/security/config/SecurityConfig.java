@@ -41,6 +41,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable) // 禁用 CSRF，对于使用 JWT 的无状态 API 应该禁用
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // 启用 CORS
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // 放行登录相关接口
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // 允许所有 OPTIONS 请求
@@ -55,10 +56,10 @@ public class SecurityConfig {
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("*")); // 设置前端的URL
+        config.setAllowedOrigins(List.of("*")); // 允许所有来源
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(false);
+        config.setAllowedHeaders(List.of("*")); // 允许所有头部
+        config.setAllowCredentials(false); // 如果不需要携带 cookie, 设置为 false
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
@@ -71,5 +72,18 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(); // 使用 BCrypt 密码加密
+    }
+
+    // 全局 CORS 配置
+    @Bean
+    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("*")); // 允许所有来源
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*")); // 允许所有头部
+        config.setAllowCredentials(false); // 设置是否允许传送 Cookie
+        source.registerCorsConfiguration("/**", config); // 应用于所有路径
+        return source;
     }
 }
