@@ -32,4 +32,10 @@ public class TaskTagServiceImpl extends ServiceImpl<TaskTagMapper, TaskTag> impl
     public void removeByUserId(Long userId) {
         taskTagMapper.deleteByUserId(userId);
     }
+
+    @Override
+    public void deleteByTaskId(Long taskId) {
+        taskTagMapper.delete(new QueryWrapper<TaskTag>().eq("task_id", taskId));
+    }
+
 }

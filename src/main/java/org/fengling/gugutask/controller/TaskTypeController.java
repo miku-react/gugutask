@@ -6,6 +6,7 @@ import org.fengling.gugutask.pojo.Task;
 import org.fengling.gugutask.pojo.TaskType;
 import org.fengling.gugutask.security.jwt.JwtUtil;
 import org.fengling.gugutask.service.TaskService;
+import org.fengling.gugutask.service.TaskTagService;
 import org.fengling.gugutask.service.TaskTypeService;
 import org.fengling.gugutask.util.R;
 import org.fengling.gugutask.util.SnowflakeIdGenerator;
@@ -27,6 +28,8 @@ public class TaskTypeController {
     private TaskTypeService taskTypeService;
     @Autowired
     private JwtUtil jwtUtil;
+    @Autowired
+    private TaskTagService taskTagService;
 
     // 创建新的任务类型，并设置userId
     @PostMapping
@@ -60,7 +63,6 @@ public class TaskTypeController {
         return R.forbidden("Token出问题了哦？没有这个用户");
     }
 
-    // 删除任务类型，确保只能删除属于该用户的任务类型
     @DeleteMapping("/{id}")
     public R<String> deleteTaskType(@PathVariable Long id, @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.substring(7);  // 提取JWT token
@@ -68,12 +70,15 @@ public class TaskTypeController {
 
         TaskType existingTaskType = taskTypeService.getById(id);
         if (existingTaskType != null && existingTaskType.getUserId() != null && existingTaskType.getUserId().equals(userId)) {
-            // 先查找所有属于该任务类型的任务
+            // 查找所有属于该任务类型的任务
             List<Task> relatedTasks = taskService.list(new QueryWrapper<Task>().eq("type_id", id));
 
-            // 删除找到的所有任务
+            // 删除找到的所有任务及其关联的 task_tags 记录
             if (!relatedTasks.isEmpty()) {
                 for (Task task : relatedTasks) {
+                    // 使用 taskTagService 删除与任务关联的 task_tags 表记录
+                    taskTagService.deleteByTaskId(task.getId());
+                    // 删除任务
                     taskService.removeById(task.getId());
                 }
             }
@@ -84,7 +89,6 @@ public class TaskTypeController {
         }
         return R.forbidden("Token出问题了哦？没有这个用户");
     }
-
 
     // 按照 userId 查找所有任务类型
     @GetMapping("/mine")

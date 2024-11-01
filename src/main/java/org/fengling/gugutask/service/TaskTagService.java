@@ -14,4 +14,7 @@ public interface TaskTagService extends IService<TaskTag> {
 
     // 根据 userId 删除 task_tags 中的记录
     void removeByUserId(Long userId);
+
+    // 根据 TaskId 删除 task_tags 中的记录
+    void deleteByTaskId(Long taskId);
 }
