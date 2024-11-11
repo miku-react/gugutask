@@ -39,6 +39,11 @@ public class TaskTypeController {
         Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
         // 设置userId
         taskType.setUserId(userId);
+        // 检查是否已存在相同的任务类型
+        if (taskTypeService.existsByUserIdAndTypeName(userId, taskType.getTypeName())) {
+            return R.error("任务类型已存在");  // 返回错误信息
+        }
+
         //设置任务ID
         taskType.setId(snowflakeIdGenerator.generateId());
         taskTypeService.save(taskType);

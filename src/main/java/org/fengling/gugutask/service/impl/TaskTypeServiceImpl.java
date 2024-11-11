@@ -42,5 +42,13 @@ public class TaskTypeServiceImpl extends ServiceImpl<TaskTypeMapper, TaskType> i
         queryWrapper.eq("user_id", userId).orderByDesc("created_at");
         return this.page(page, queryWrapper);
     }
+
+    @Override
+    public boolean existsByUserIdAndTypeName(Long userId, String typeName) {
+        // 使用 MyBatis-Plus 提供的查询方法
+        QueryWrapper<TaskType> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId).eq("type_name", typeName);
+        return this.count(queryWrapper) > 0;  // 判断是否有记录
+    }
 }
 

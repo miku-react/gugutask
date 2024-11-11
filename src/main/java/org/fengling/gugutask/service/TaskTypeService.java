@@ -16,4 +16,7 @@ public interface TaskTypeService extends IService<TaskType> {
     void removeByUserId(Long userId);
 
     Page<TaskType> findPagedTaskTypesByUserId(Long userId, Page<TaskType> page);
+
+    boolean existsByUserIdAndTypeName(Long userId, String typeName); // 自定义方法
+
 }
