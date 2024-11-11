@@ -1,5 +1,6 @@
 package org.fengling.gugutask.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.fengling.gugutask.pojo.TaskType;
 
@@ -13,4 +14,6 @@ public interface TaskTypeService extends IService<TaskType> {
     void createDefaultTaskTypesForUser(Long userId);
 
     void removeByUserId(Long userId);
+
+    Page<TaskType> findPagedTaskTypesByUserId(Long userId, Page<TaskType> page);
 }

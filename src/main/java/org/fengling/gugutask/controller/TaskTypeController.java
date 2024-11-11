@@ -1,6 +1,7 @@
 package org.fengling.gugutask.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.fengling.gugutask.dto.TaskTypeD;
 import org.fengling.gugutask.pojo.Task;
 import org.fengling.gugutask.pojo.TaskType;
@@ -104,5 +105,36 @@ public class TaskTypeController {
         ).collect(Collectors.toList());
 
         return R.success(taskTypeDList);  // 返回封装的成功数据
+    }
+
+    // 按照 userId 查找所有的任务类型并且进行分页
+    @GetMapping("/mine/paged")
+    public R<Page<TaskTypeD>> getPagedTaskTypesByUserId
+    (@RequestHeader("Authorization") String authHeader,
+     @RequestParam(defaultValue = "1") int page,//当前页面，默认1页
+     @RequestParam(defaultValue = "5") int size //每页大小，默认5页
+    ) {
+        String token = authHeader.substring(7);
+        Long userId = jwtUtil.extractUserId(token);
+
+        // 创建分页对象
+        Page<TaskType> taskTypePage = new Page<>(page, size);
+
+        // 查询分页数据
+        Page<TaskType> pagedTaskTypes = taskTypeService.findPagedTaskTypesByUserId(userId, taskTypePage);
+
+        // 转换为 TaskTypeD 类型
+        Page<TaskTypeD> taskTypeDPage = new Page<>();
+
+        taskTypeDPage.setCurrent(pagedTaskTypes.getCurrent());
+        taskTypeDPage.setSize(pagedTaskTypes.getSize());
+        taskTypeDPage.setTotal(pagedTaskTypes.getTotal());
+        taskTypeDPage.setRecords(
+                pagedTaskTypes.getRecords().stream().map(taskType ->
+                        new TaskTypeD(taskType.getId(), taskType.getTypeName(), taskType.getCreatedAt(), taskType.getUpdatedAt())
+                ).collect(Collectors.toList())
+        );
+
+        return R.success(taskTypeDPage);  // 返回分页数据
     }
 }

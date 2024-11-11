@@ -1,5 +1,7 @@
 package org.fengling.gugutask.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.fengling.gugutask.dao.TaskTypeMapper;
 import org.fengling.gugutask.pojo.TaskType;
@@ -34,5 +36,11 @@ public class TaskTypeServiceImpl extends ServiceImpl<TaskTypeMapper, TaskType> i
     }
 
 
+    @Override
+    public Page<TaskType> findPagedTaskTypesByUserId(Long userId, Page<TaskType> page) {
+        QueryWrapper<TaskType> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id", userId).orderByDesc("created_at");
+        return this.page(page, queryWrapper);
+    }
 }
 
