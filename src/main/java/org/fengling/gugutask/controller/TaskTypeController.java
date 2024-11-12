@@ -60,6 +60,10 @@ public class TaskTypeController {
         Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
 
         TaskType existingTaskType = taskTypeService.getById(id);
+        // 检查是否已存在相同的任务类型
+        if (taskTypeService.existsByUserIdAndTypeName(userId, taskType.getTypeName())) {
+            return R.error("任务类型已存在");  // 返回错误信息
+        }
         if (existingTaskType != null && existingTaskType.getUserId() != null && existingTaskType.getUserId().equals(userId)) {
             taskType.setId(id);
             taskType.setUserId(userId);  // 确保userId保持一致
