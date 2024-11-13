@@ -36,4 +36,24 @@ public interface TaskMapper extends BaseMapper<Task> {
             "LEFT JOIN task_tags ttg ON tag.id = ttg.tag_id " +
             "WHERE ttg.task_id = #{taskId}")
     List<Map<String, Object>> findTagsByTaskId(Long taskId);
+
+    // 查询指定 userId 和 taskType 的任务及其相关信息
+    @Select("SELECT t.*, " +
+            "tt.id AS type_id, " +
+            "tt.type_name, " +
+            "tt.created_at AS type_created_at, " +
+            "tt.updated_at AS type_updated_at, " +
+            "tag.id AS tag_id, " +
+            "tag.tag_name, " +
+            "tag.created_at AS tag_created_at, " +
+            "tag.updated_at AS tag_updated_at " +
+            "FROM tasks t " +
+            "LEFT JOIN task_types tt ON t.type_id = tt.id " +  // 连接条件
+            "LEFT JOIN task_tags ttg ON t.id = ttg.task_id " +
+            "LEFT JOIN tags tag ON ttg.tag_id = tag.id " +
+            "WHERE t.user_id = #{userId} " +
+            "AND t.type_id = #{taskType}")
+    List<Map<String, Object>> getTasksWithDetailsByUserIdAndTaskType(@Param("userId") Long userId, @Param("taskType") Long taskType);
+
+
 }

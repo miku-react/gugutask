@@ -48,6 +48,25 @@ public class TaskController {
         return R.success(taskDetailsDList);
     }
 
+    // 根据任务类型查询任务
+    @GetMapping("/user/tasktype")
+    public R<List<TaskDetailsD>> getTasksByType(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestParam(value = "taskTypeId") Long taskTypeId) {
+        String token = authHeader.substring(7);  // 提取JWT token
+        Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
+
+        // 如果 taskType 存在，按类型查询；否则查询所有
+        List<TaskDetailsD> taskDetailsDList;
+        if (taskTypeId != null) {
+            taskDetailsDList = taskService.getTasksWithDetailsByUserIdAndTaskType(userId, taskTypeId);
+        } else {
+            return R.error("咱没有拿到你要的任务类型");
+        }
+
+        return R.success(taskDetailsDList);
+    }
+
 
     // 创建任务
     @PostMapping

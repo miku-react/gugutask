@@ -14,4 +14,6 @@ public interface TaskService extends IService<Task> {
     void removeByUserId(Long userId);
 
     List<TaskDetailsD> getTasksWithDetailsByUserId(Long userId);
+
+    List<TaskDetailsD> getTasksWithDetailsByUserIdAndTaskType(Long userId, Long taskType);
 }
