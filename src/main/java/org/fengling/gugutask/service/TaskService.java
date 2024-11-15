@@ -1,5 +1,6 @@
 package org.fengling.gugutask.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.fengling.gugutask.dto.TaskDetailsD;
 import org.fengling.gugutask.pojo.Task;
@@ -15,5 +16,5 @@ public interface TaskService extends IService<Task> {
 
     List<TaskDetailsD> getTasksWithDetailsByUserId(Long userId);
 
-    List<TaskDetailsD> getTasksWithDetailsByUserIdAndTaskType(Long userId, Long taskType);
+    Page<TaskDetailsD> getTasksWithDetailsByUserIdAndTaskType(Long userId, Long taskType, int page, int size);
 }

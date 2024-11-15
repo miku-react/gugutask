@@ -1,6 +1,7 @@
 package org.fengling.gugutask.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.fengling.gugutask.dto.TaskDetailsD;
 import org.fengling.gugutask.pojo.Task;
 import org.fengling.gugutask.pojo.TaskTag;
@@ -48,23 +49,23 @@ public class TaskController {
         return R.success(taskDetailsDList);
     }
 
-    // 根据任务类型查询任务
+    // 根据任务类型查询任务（附带分页）
     @GetMapping("/user/tasktype")
-    public R<List<TaskDetailsD>> getTasksByType(
+    public R<Page<TaskDetailsD>> getTasksByType(
             @RequestHeader("Authorization") String authHeader,
-            @RequestParam(value = "taskTypeId") Long taskTypeId) {
+            @RequestParam(value = "taskTypeId") Long taskTypeId,
+            @RequestParam(value = "page", defaultValue = "1") Integer page,
+            @RequestParam(value = "size", defaultValue = "5") Integer size) {
         String token = authHeader.substring(7);  // 提取JWT token
         Long userId = jwtUtil.extractUserId(token);  // 从JWT中提取userId
 
-        // 如果 taskType 存在，按类型查询；否则查询所有
-        List<TaskDetailsD> taskDetailsDList;
-        if (taskTypeId != null) {
-            taskDetailsDList = taskService.getTasksWithDetailsByUserIdAndTaskType(userId, taskTypeId);
-        } else {
+        if (taskTypeId == null) {
             return R.error("咱没有拿到你要的任务类型");
         }
+        // 分页查询
+        Page<TaskDetailsD> taskDetailsPage = taskService.getTasksWithDetailsByUserIdAndTaskType(userId, taskTypeId, page, size);
+        return R.success(taskDetailsPage);
 
-        return R.success(taskDetailsDList);
     }
 
 
