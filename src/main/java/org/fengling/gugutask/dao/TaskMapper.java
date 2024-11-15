@@ -1,6 +1,7 @@
 package org.fengling.gugutask.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -48,12 +49,11 @@ public interface TaskMapper extends BaseMapper<Task> {
             "tag.created_at AS tag_created_at, " +
             "tag.updated_at AS tag_updated_at " +
             "FROM tasks t " +
-            "LEFT JOIN task_types tt ON t.type_id = tt.id " +  // 连接条件
+            "LEFT JOIN task_types tt ON t.type_id = tt.id " +
             "LEFT JOIN task_tags ttg ON t.id = ttg.task_id " +
             "LEFT JOIN tags tag ON ttg.tag_id = tag.id " +
             "WHERE t.user_id = #{userId} " +
             "AND t.type_id = #{taskType}")
-    List<Map<String, Object>> getTasksWithDetailsByUserIdAndTaskType(@Param("userId") Long userId, @Param("taskType") Long taskType);
-
+    Page<Map<String, Object>> getTasksWithDetailsByUserIdAndTaskType(Page<Map<String, Object>> page, @Param("userId") Long userId, @Param("taskType") Long taskType);
 
 }
