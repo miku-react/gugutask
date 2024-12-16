@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: gugutask
+
+  datasource:
+    url: jdbc:mysql://${db.host}:${db.port}/gugutask?useSSL=false&serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8
+    username: ${db.username}
+    password: ${db.password}
+
+mybatis-plus:
+  mapper-locations: classpath*:mapper/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+
+server:
+  port: 3006
