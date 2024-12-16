@@ -13,6 +13,12 @@ mybatis-plus:
   mapper-locations: classpath*:mapper/*.xml
   configuration:
     map-underscore-to-camel-case: true
-    
+
 server:
   port: 3006
+
+
+  servlet:
+    multipart:
+      max-file-size: 10MB # 单个文件最大大小
+      max-request-size: 10MB # 总请求大小
