@@ -36,7 +36,8 @@ public class UserController {
                     user.getUsername(),
                     user.getEmail(),
                     user.getCreatedAt(),
-                    user.getUpdatedAt()
+                    user.getUpdatedAt(),
+                    user.getAvatar()
             );
             return R.success(userD);  // 返回封装的成功数据
         }
@@ -88,7 +89,8 @@ public class UserController {
                 userAfterUpdate.getUsername(),
                 userAfterUpdate.getEmail(),
                 userAfterUpdate.getCreatedAt(),
-                userAfterUpdate.getUpdatedAt()
+                userAfterUpdate.getUpdatedAt(),
+                userAfterUpdate.getAvatar()
         );
 
         return R.success(updatedUserD);  // 返回封装的成功数据

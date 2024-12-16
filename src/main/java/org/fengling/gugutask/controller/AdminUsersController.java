@@ -31,7 +31,12 @@ public class AdminUsersController {
 
         // 将 User 转换为 UserD
         List<UserD> userDList = users.stream()
-                .map(user -> new UserD(user.getUsername(), user.getEmail(), user.getCreatedAt(), user.getUpdatedAt()))
+                .map(user -> new UserD(
+                        user.getUsername(),
+                        user.getEmail(),
+                        user.getCreatedAt(),
+                        user.getUpdatedAt(),
+                        user.getAvatar()))
                 .collect(Collectors.toList());
 
         return R.success(userDList);
@@ -46,7 +51,12 @@ public class AdminUsersController {
         }
 
         // 封装为 UserD 返回
-        UserD userD = new UserD(user.getUsername(), user.getEmail(), user.getCreatedAt(), user.getUpdatedAt());
+        UserD userD = new UserD(
+                user.getUsername(),
+                user.getEmail(),
+                user.getCreatedAt(),
+                user.getUpdatedAt(),
+                user.getAvatar());
         return R.success(userD);
     }
 
@@ -116,7 +126,12 @@ public class AdminUsersController {
         userService.updateById(user);
 
         // 封装为 UserD 返回
-        UserD userD = new UserD(user.getUsername(), user.getEmail(), user.getCreatedAt(), user.getUpdatedAt());
+        UserD userD = new UserD(
+                user.getUsername(),
+                user.getEmail(),
+                user.getCreatedAt(),
+                user.getUpdatedAt(),
+                user.getAvatar());
         return R.success(userD);
     }
 
