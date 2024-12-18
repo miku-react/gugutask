@@ -1,31 +1,51 @@
 package org.fengling.gugutask.controller;
 
+import lombok.RequiredArgsConstructor;
+import org.fengling.gugutask.pojo.User;
+import org.fengling.gugutask.security.jwt.JwtUtil;
+import org.fengling.gugutask.service.UserService;
 import org.fengling.gugutask.util.CosOP;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.fengling.gugutask.util.R;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.Map;
 
-@Controller
+@RestController
+@RequiredArgsConstructor
 @RequestMapping("/api")
 public class FileController {
-    @PostMapping("/upload-avatar")
-    public ResponseEntity<?> uploadAvatar(@RequestParam("file") MultipartFile file) {
-        if (file.isEmpty() || !file.getContentType().startsWith("image/")) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("文件无效，请上传图片文件！");
-        }
+    private final UserService userService;
+    private final JwtUtil jwtUtil;
 
+    @Transactional
+    @PostMapping("/upload-avatar")
+    public R<?> uploadAvatar(@RequestHeader("Authorization") String authHeader, @RequestParam("file") MultipartFile file) {
         try {
+            String token = authHeader.substring(7);  // 提取JWT token
+            String username = jwtUtil.extractUsername(token);  // 从JWT中提取用户名
+
+            User user = userService.findByUsername(username);
+
+            // 验证文件类型
+            if (file.isEmpty() || !file.getContentType().startsWith("image/")) {
+                return R.error("文件无效，请上传图片文件！");
+            }
+
+            if (!file.getOriginalFilename().toLowerCase().matches(".*\\.(jpg|jpeg|png)$")) {
+                return R.error("仅支持 JPG、JPEG 或 PNG 格式的图片！");
+            }
+
+            // 上传文件到对象存储
             String url = CosOP.uploadFile(file, "avatars");
-            return ResponseEntity.ok().body(Map.of("url", url));
+            user.setAvatar(url);
+            userService.updateById(user);
+            return R.success(Map.of("url", url));
+
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("文件上传失败，请稍后再试！");
+            return R.error("文件上传失败，请稍后再试！");
         }
     }
 }

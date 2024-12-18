@@ -1,6 +1,10 @@
 spring:
   application:
     name: gugutask
+  servlet:
+    multipart:
+      max-file-size: 5MB # 单个文件最大大小
+      max-request-size: 5MB # 总请求大小
 
   datasource:
     url: jdbc:mysql://${db.host}:${db.port}/gugutask?useSSL=false&serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=UTF-8
@@ -18,7 +22,3 @@ server:
   port: 3006
 
 
-  servlet:
-    multipart:
-      max-file-size: 10MB # 单个文件最大大小
-      max-request-size: 10MB # 总请求大小
